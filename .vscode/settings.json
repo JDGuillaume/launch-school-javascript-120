@@ -1,0 +1,11 @@
+{
+  "cSpell.words": ["PEDAC"],
+  "workbench.colorCustomizations": {
+    "titleBar.activeForeground": "#FFF",
+    "titleBar.inactiveForeground": "#ffffff",
+    "titleBar.activeBackground": "#f25858",
+    "titleBar.inactiveBackground": "#f25858"
+  },
+  "spellright.language": ["en"],
+  "spellright.documentTypes": ["markdown", "latex", "plaintext", "javascript"]
+}

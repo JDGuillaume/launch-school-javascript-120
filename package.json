@@ -1,0 +1,27 @@
+{
+  "name": "launch-school-javascript-120",
+  "version": "1.0.0",
+  "description": "Exercises from Launch School JS120: Object Oriented Programming with JavaScript",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JDGuillaume/launch-school-javascript-120.git"
+  },
+  "author": "Joseph Guillaume",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/JDGuillaume/launch-school-javascript-120/issues"
+  },
+  "homepage": "https://github.com/JDGuillaume/launch-school-javascript-120#readme",
+  "dependencies": {
+    "readline-sync": "^1.4.10"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.20.0",
+    "eslint-cli": "^1.1.1"
+  }
+}
