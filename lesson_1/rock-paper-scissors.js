@@ -71,6 +71,22 @@ const RPSGame = {
     spock: ['scissors', 'rock'],
   },
 
+  updateComputerChoices() {
+    const newChoices = [];
+
+    for (let choice in this.human.moveHistory) {
+      for (let count = this.human.moveHistory[choice]; count > 0; count--) {
+        Object.keys(this.WIN_CONDITIONS).forEach(possibleChoice => {
+          if (this.WIN_CONDITIONS[possibleChoice].includes(choice)) {
+            newChoices.push(possibleChoice);
+          }
+        });
+      }
+    }
+
+    this.computer.choices = newChoices;
+  },
+
   displayWelcomeMessage() {
     console.log(
       `Welcome to Rock, Paper, Scissors, Lizard, Spock! You'll be playing best of ${this.GAMES_TO_WIN}.`
@@ -80,6 +96,7 @@ const RPSGame = {
   displayWinner() {
     let humanMove = this.human.move;
     let computerMove = this.computer.move;
+
     this.human.recordMove();
     this.computer.recordMove();
 
@@ -156,7 +173,8 @@ const RPSGame = {
       if (!this.playAgain()) break;
 
       this.resetScore();
-      console.clear();
+      this.updateComputerChoices();
+      // console.clear();
     }
 
     this.displayGoodbyeMessage();
