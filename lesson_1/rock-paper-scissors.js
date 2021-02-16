@@ -4,8 +4,16 @@ const readline = require('readline-sync');
 function createPlayer() {
   return {
     move: null,
+    moveHistory: {},
     score: 0,
     choices: ['rock', 'paper', 'scissors', 'lizard', 'spock'],
+    recordMove() {
+      if (this.moveHistory[this.move]) {
+        this.moveHistory[this.move]++;
+      } else {
+        this.moveHistory[this.move] = 1;
+      }
+    },
   };
 }
 
@@ -54,6 +62,7 @@ const RPSGame = {
   computer: createComputer(),
 
   GAMES_TO_WIN: 5,
+
   WIN_CONDITIONS: {
     rock: ['scissors', 'lizard'],
     paper: ['rock', 'spock'],
@@ -71,6 +80,8 @@ const RPSGame = {
   displayWinner() {
     let humanMove = this.human.move;
     let computerMove = this.computer.move;
+    this.human.recordMove();
+    this.computer.recordMove();
 
     console.log(`You chose: ${this.human.move}.`);
     console.log(`The computer chose: ${this.computer.move}.`);
@@ -101,6 +112,13 @@ const RPSGame = {
         this.human.score === this.GAMES_TO_WIN ? `You` : `Computer`
       } won best of 5!`
     );
+
+    console.log(`------------`);
+    console.log(`Player Moves`);
+    console.log(this.human.moveHistory);
+    console.log();
+    console.log(`Computer Moves`);
+    console.log(this.computer.moveHistory);
   },
 
   displayGoodbyeMessage() {
