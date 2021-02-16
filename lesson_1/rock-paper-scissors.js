@@ -5,6 +5,7 @@ function createPlayer() {
   return {
     move: null,
     score: 0,
+    choices: ['rock', 'paper', 'scissors', 'lizard', 'spock'],
   };
 }
 
@@ -15,9 +16,8 @@ function createComputer() {
     move: null,
 
     choose() {
-      const choices = ['rock', 'paper', 'scissors'];
-      let randomIndex = Math.floor(Math.random() * choices.length);
-      this.move = choices[randomIndex];
+      let randomIndex = Math.floor(Math.random() * playerObject.choices.length);
+      this.move = playerObject.choices[randomIndex];
     },
   };
 
@@ -32,9 +32,13 @@ function createHuman() {
       let choice;
 
       while (true) {
-        console.log(`Please choose rock, paper, or scissors`);
+        console.log(
+          `Please choose one of the following: ${playerObject.choices.join(
+            ', '
+          )}`
+        );
         choice = readline.question();
-        if (['rock', 'paper', 'scissors'].includes(choice)) break;
+        if (playerObject.choices.includes(choice)) break;
         console.log(`Sorry, invalid choice.`);
       }
 
@@ -45,33 +49,22 @@ function createHuman() {
   return Object.assign(playerObject, humanObject);
 }
 
-function createMove() {
-  return {
-    // possible state: type of move (rock, paper, scissors)
-  };
-}
-
-function createRule() {
-  return {
-    // possible state? not clear whether Rules need state
-  };
-}
-
-/* Since we don't know yet where to put 'compare',
-   let's define it as an ordinary function. */
-
-compare = function(move1, move2) {
-  // not yet implemented.
-};
-
 const RPSGame = {
   human: createHuman(),
   computer: createComputer(),
+
   GAMES_TO_WIN: 5,
+  WIN_CONDITIONS: {
+    rock: ['scissors', 'lizard'],
+    paper: ['rock', 'spock'],
+    scissors: ['paper', 'lizard'],
+    lizard: ['spock', 'paper'],
+    spock: ['scissors', 'rock'],
+  },
 
   displayWelcomeMessage() {
     console.log(
-      `Welcome to Rock, Paper, Scissors! You'll be playing best of ${this.GAMES_TO_WIN}.`
+      `Welcome to Rock, Paper, Scissors, Lizard, Spock! You'll be playing best of ${this.GAMES_TO_WIN}.`
     );
   },
 
@@ -82,21 +75,13 @@ const RPSGame = {
     console.log(`You chose: ${this.human.move}.`);
     console.log(`The computer chose: ${this.computer.move}.`);
 
-    if (
-      (humanMove === 'rock' && computerMove === 'scissors') ||
-      (humanMove === 'paper' && computerMove === 'rock') ||
-      (humanMove === 'scissors' && computerMove === 'paper')
-    ) {
+    if (this.WIN_CONDITIONS[humanMove].includes(computerMove)) {
       this.human.score++;
       console.log(`You win!`);
       console.log(
         `Player - ${this.human.score} Computer - ${this.computer.score}`
       );
-    } else if (
-      (humanMove === 'rock' && computerMove === 'paper') ||
-      (humanMove === 'paper' && computerMove === 'scissors') ||
-      (humanMove === 'scissors' && computerMove === 'rock')
-    ) {
+    } else if (this.WIN_CONDITIONS[computerMove].includes(humanMove)) {
       this.computer.score++;
       console.log(`Computer wins!`);
       console.log(
@@ -119,7 +104,9 @@ const RPSGame = {
   },
 
   displayGoodbyeMessage() {
-    console.log('Thanks for playing Rock, Paper, Scissors. Goodbye!');
+    console.log(
+      'Thanks for playing Rock, Paper, Scissors, Lizard, Spock! Goodbye!'
+    );
   },
 
   playAgain() {
@@ -151,7 +138,10 @@ const RPSGame = {
       if (!this.playAgain()) break;
 
       this.resetScore();
+      console.clear();
     }
+
+    this.displayGoodbyeMessage();
   },
 };
 
