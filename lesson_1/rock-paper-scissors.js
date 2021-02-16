@@ -153,6 +153,7 @@ const RPSGame = {
   resetScore() {
     this.human.score = 0;
     this.computer.score = 0;
+    console.clear();
   },
 
   play() {
@@ -174,7 +175,6 @@ const RPSGame = {
 
       this.resetScore();
       this.updateComputerChoices();
-      // console.clear();
     }
 
     this.displayGoodbyeMessage();
