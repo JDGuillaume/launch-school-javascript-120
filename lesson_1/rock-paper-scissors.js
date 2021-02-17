@@ -41,13 +41,13 @@ function createHuman() {
 
       while (true) {
         console.log(
-          `Please choose one of the following: ${playerObject.choices.join(
+          `\nPlease choose one of the following: ${playerObject.choices.join(
             ', '
           )}`
         );
-        choice = readline.question();
+        choice = readline.question().toLowerCase();
         if (playerObject.choices.includes(choice)) break;
-        console.log(`Sorry, invalid choice.`);
+        console.log(`\nSorry, invalid choice.`);
       }
 
       this.move = choice;
@@ -93,33 +93,62 @@ const RPSGame = {
     );
   },
 
-  displayWinner() {
-    let humanMove = this.human.move;
-    let computerMove = this.computer.move;
+  displayMoves() {
+    console.log(`\nYou chose: ${this.human.move}.`);
+    console.log(`The computer chose: ${this.computer.move}.`);
+  },
 
+  recordMoves() {
     this.human.recordMove();
     this.computer.recordMove();
+  },
 
-    console.log(`You chose: ${this.human.move}.`);
-    console.log(`The computer chose: ${this.computer.move}.`);
+  findWinner() {
+    let humanMove = this.human.move;
+    let computerMove = this.computer.move;
+    let winner;
 
     if (this.WIN_CONDITIONS[humanMove].includes(computerMove)) {
-      this.human.score++;
-      console.log(`You win!`);
-      console.log(
-        `Player - ${this.human.score} Computer - ${this.computer.score}`
-      );
+      winner = 'human';
     } else if (this.WIN_CONDITIONS[computerMove].includes(humanMove)) {
-      this.computer.score++;
-      console.log(`Computer wins!`);
-      console.log(
-        `Player - ${this.human.score} Computer - ${this.computer.score}`
-      );
+      winner = 'computer';
     } else {
-      console.log(`It's a tie.`);
-      console.log(
-        `Player - ${this.human.score} Computer - ${this.computer.score}`
-      );
+      winner = 'tie';
+    }
+
+    return winner;
+  },
+
+  incrementScore(winner) {
+    switch (winner) {
+      case 'human':
+        this.human.score++;
+        break;
+      case 'computer':
+        this.computer.score++;
+    }
+  },
+
+  displayResults(winner) {
+    switch (winner) {
+      case 'human':
+        console.log(`\nYou win!`);
+        console.log(
+          `Player - ${this.human.score} Computer - ${this.computer.score}`
+        );
+        break;
+      case 'computer':
+        console.log(`\nComputer wins!`);
+        console.log(
+          `Player - ${this.human.score} Computer - ${this.computer.score}`
+        );
+        break;
+      default:
+        console.log(`\nIt's a tie.`);
+        console.log(
+          `Player - ${this.human.score} Computer - ${this.computer.score}`
+        );
+        break;
     }
   },
 
@@ -127,7 +156,7 @@ const RPSGame = {
     console.log(
       `${
         this.human.score === this.GAMES_TO_WIN ? `You` : `Computer`
-      } won best of 5!`
+      } won best of ${this.GAMES_TO_WIN}!`
     );
 
     console.log(`------------`);
@@ -140,12 +169,12 @@ const RPSGame = {
 
   displayGoodbyeMessage() {
     console.log(
-      'Thanks for playing Rock, Paper, Scissors, Lizard, Spock! Goodbye!'
+      '\nThanks for playing Rock, Paper, Scissors, Lizard, Spock! Goodbye!'
     );
   },
 
   playAgain() {
-    console.log(`Would you like to play again? (y/n)`);
+    console.log(`\nWould you like to play again? (y/n)`);
     let answer = readline.question();
     return answer.toLowerCase()[0] === 'y';
   },
@@ -166,7 +195,13 @@ const RPSGame = {
       ) {
         this.human.choose();
         this.computer.choose();
-        this.displayWinner();
+
+        this.displayMoves();
+        this.recordMoves();
+
+        const winner = this.findWinner();
+        this.incrementScore(winner);
+        this.displayResults(winner);
       }
 
       this.displayOverallWinner();
