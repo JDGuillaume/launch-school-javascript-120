@@ -14,8 +14,8 @@ class Computer extends Player {
   }
 
   choose() {
-    this.randomIndex = Math.floor(Math.random() * this.choices.length);
-    this.move = this.choices[this.randomIndex];
+    let randomIndex = Math.floor(Math.random() * this.choices.length);
+    this.move = this.choices[randomIndex];
   }
 }
 
@@ -25,16 +25,16 @@ class Human extends Player {
   }
 
   choose() {
-    this.choice = null;
+    let choice;
 
     while (true) {
       console.log('Please choose rock, paper, or scissors:');
-      this.choice = readline.question();
-      if (this.choices.includes(this.choice)) break;
+      choice = readline.question();
+      if (this.choices.includes(choice)) break;
       console.log('Sorry, invalid choice.');
     }
 
-    this.move = this.choice;
+    this.move = choice;
   }
 }
 
@@ -56,19 +56,19 @@ class RPSGame {
     console.log(`You chose: ${this.human.move}`);
     console.log(`The computer chose: ${this.computer.move}`);
 
-    this.humanMove = this.human.move;
-    this.computerMove = this.computer.move;
+    let humanMove = this.human.move;
+    let computerMove = this.computer.move;
 
     if (
-      (this.humanMove === 'rock' && this.computerMove === 'scissors') ||
-      (this.humanMove === 'paper' && this.computerMove === 'rock') ||
-      (this.humanMove === 'scissors' && this.computerMove === 'paper')
+      (humanMove === 'rock' && computerMove === 'scissors') ||
+      (humanMove === 'paper' && computerMove === 'rock') ||
+      (humanMove === 'scissors' && computerMove === 'paper')
     ) {
       console.log('You win!');
     } else if (
-      (this.humanMove === 'rock' && this.computerMove === 'paper') ||
-      (this.humanMove === 'paper' && this.computerMove === 'scissors') ||
-      (this.humanMove === 'scissors' && this.computerMove === 'rock')
+      (humanMove === 'rock' && computerMove === 'paper') ||
+      (humanMove === 'paper' && computerMove === 'scissors') ||
+      (humanMove === 'scissors' && computerMove === 'rock')
     ) {
       console.log('Computer wins!');
     } else {
@@ -78,8 +78,8 @@ class RPSGame {
 
   playAgain() {
     console.log('Would you like to play again? (y/n)');
-    this.answer = readline.question();
-    return this.answer.toLowerCase()[0] === 'y';
+    let answer = readline.question();
+    return answer.toLowerCase()[0] === 'y';
   }
 
   play() {
