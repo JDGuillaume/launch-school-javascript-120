@@ -206,21 +206,49 @@ class TTTGame {
   play() {
     //SPIKE
     this.displayWelcomeMessage();
-    this.board.display();
 
     while (true) {
-      this.humanMoves();
-      if (this.gameOver()) break;
+      this.board.display();
 
-      this.computerMoves();
-      if (this.gameOver()) break;
+      while (true) {
+        this.humanMoves();
+        if (this.gameOver()) break;
+
+        this.computerMoves();
+        if (this.gameOver()) break;
+
+        this.board.displayWithClear();
+      }
 
       this.board.displayWithClear();
+      this.displayResults();
+
+      if (!this.playAgain()) break;
+
+      this.reset();
     }
 
-    this.board.displayWithClear();
-    this.displayResults();
     this.displayGoodbyeMessage();
+  }
+
+  playAgain() {
+    console.log(`Would you like to play again? (y/n)?`);
+    let choice;
+
+    while (true) {
+      choice = readline.question().toLowerCase();
+      if (choice === 'y' || choice === 'n') break;
+
+      console.log(`Sorry, that's not a valid choice.`);
+      console.log('');
+    }
+
+    return choice === 'y';
+  }
+
+  reset() {
+    this.board = new Board();
+    console.clear();
   }
 
   someoneWon() {
