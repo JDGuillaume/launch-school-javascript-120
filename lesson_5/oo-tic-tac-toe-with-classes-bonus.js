@@ -149,10 +149,16 @@ class TTTGame {
     let validChoices = this.board.unusedSquares();
     let choice;
 
-    if (this.isPossibleHumanWin().length) {
+    if (this.isPossibleComputerWin().length) {
+      choice = this.isPossibleComputerWin()[0].find(element =>
+        validChoices.includes(element)
+      );
+    } else if (this.isPossibleHumanWin().length) {
       choice = this.isPossibleHumanWin()[0].find(element =>
         validChoices.includes(element)
       );
+    } else if (validChoices.includes('5')) {
+      choice = '5';
     } else {
       do {
         choice = Math.floor(9 * Math.random() + 1).toString();
@@ -201,6 +207,15 @@ class TTTGame {
     }
 
     this.board.markSquareAt(choice, this.human.getMarker());
+  }
+
+  isPossibleComputerWin() {
+    return TTTGame.POSSIBLE_WINNING_ROWS.filter(row => {
+      return (
+        this.board.countMarkersFor(this.computer, row) === 2 &&
+        this.board.countMarkersFor(this.human, row) === 0
+      );
+    });
   }
 
   isPossibleHumanWin() {
