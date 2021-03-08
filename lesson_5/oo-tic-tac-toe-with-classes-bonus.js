@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 /* eslint-disable no-mixed-operators */
 const readline = require('readline-sync');
 
@@ -44,8 +45,9 @@ class Board {
   }
 
   // eslint-disable-next-line max-lines-per-function
-  display() {
+  display(humanScore, computerScore) {
     console.log('');
+    console.log(`Score: Player - ${humanScore} Computer - ${computerScore}`);
     console.log('     |     |');
     console.log(
       `  ${this.squares['1']}  |  ${this.squares['2']}  |  ${this.squares['3']}`
@@ -66,11 +68,11 @@ class Board {
     console.log('');
   }
 
-  displayWithClear() {
+  displayWithClear(humanScore, computerScore) {
     console.clear();
     console.log('');
     console.log('');
-    this.display();
+    this.display(humanScore, computerScore);
   }
 
   isFull() {
@@ -106,10 +108,19 @@ class Board {
 class Player {
   constructor(marker) {
     this.marker = marker;
+    this.score = 0;
   }
 
   getMarker() {
     return this.marker;
+  }
+
+  getScore() {
+    return this.score;
+  }
+
+  incrementScore() {
+    this.score += 1;
   }
 }
 
@@ -145,16 +156,21 @@ class TTTGame {
     ['3', '5', '7'], // diagonal: bottom-left to top-right
   ];
 
+  static GAMES_TO_WIN = 3;
+
   computerMoves() {
     let validChoices = this.board.unusedSquares();
     let choice;
 
-    if (this.isPossibleComputerWin().length) {
-      choice = this.isPossibleComputerWin()[0].find(element =>
+    let possibleComputerWins = this.isPossibleWin(this.computer, this.human);
+    let possibleHumanWins = this.isPossibleWin(this.human, this.computer);
+
+    if (possibleComputerWins.length) {
+      choice = possibleComputerWins[0].find(element =>
         validChoices.includes(element)
       );
-    } else if (this.isPossibleHumanWin().length) {
-      choice = this.isPossibleHumanWin()[0].find(element =>
+    } else if (possibleHumanWins.length) {
+      choice = possibleHumanWins[0].find(element =>
         validChoices.includes(element)
       );
     } else if (validChoices.includes('5')) {
@@ -171,11 +187,21 @@ class TTTGame {
   displayWelcomeMessage() {
     console.clear();
     console.log(`Welcome to Tic Tac Toe!`);
-    console.log('');
+    console.log(`You'll be playing best of 3!`);
   }
 
   displayGoodbyeMessage() {
     console.log('Thanks for playing Tic Tac Toe! Goodbye!');
+  }
+
+  displayOverallWinner() {
+    if (this.human.score === 3) {
+      console.log(`You won it all! Congratulations!`);
+      console.log(``);
+    } else {
+      console.log(`The computer won! Better luck next time!`);
+      console.log(``);
+    }
   }
 
   displayResults() {
@@ -209,20 +235,11 @@ class TTTGame {
     this.board.markSquareAt(choice, this.human.getMarker());
   }
 
-  isPossibleComputerWin() {
+  isPossibleWin(player, opponent) {
     return TTTGame.POSSIBLE_WINNING_ROWS.filter(row => {
       return (
-        this.board.countMarkersFor(this.computer, row) === 2 &&
-        this.board.countMarkersFor(this.human, row) === 0
-      );
-    });
-  }
-
-  isPossibleHumanWin() {
-    return TTTGame.POSSIBLE_WINNING_ROWS.filter(row => {
-      return (
-        this.board.countMarkersFor(this.human, row) === 2 &&
-        this.board.countMarkersFor(this.computer, row) === 0
+        this.board.countMarkersFor(player, row) === 2 &&
+        this.board.countMarkersFor(opponent, row) === 0
       );
     });
   }
@@ -237,8 +254,11 @@ class TTTGame {
     //SPIKE
     this.displayWelcomeMessage();
 
-    while (true) {
-      this.board.display();
+    while (
+      this.human.getScore() !== TTTGame.GAMES_TO_WIN &&
+      this.computer.getScore() !== TTTGame.GAMES_TO_WIN
+    ) {
+      this.board.display(this.human.getScore(), this.computer.getScore());
 
       while (true) {
         this.humanMoves();
@@ -247,33 +267,23 @@ class TTTGame {
         this.computerMoves();
         if (this.gameOver()) break;
 
-        this.board.displayWithClear();
+        this.board.displayWithClear(
+          this.human.getScore(),
+          this.computer.getScore()
+        );
       }
 
-      this.board.displayWithClear();
+      this.board.displayWithClear(
+        this.human.getScore(),
+        this.computer.getScore()
+      );
       this.displayResults();
-
-      if (!this.playAgain()) break;
 
       this.reset();
     }
 
+    this.displayOverallWinner();
     this.displayGoodbyeMessage();
-  }
-
-  playAgain() {
-    console.log(`Would you like to play again? (y/n)?`);
-    let choice;
-
-    while (true) {
-      choice = readline.question().toLowerCase();
-      if (choice === 'y' || choice === 'n') break;
-
-      console.log(`Sorry, that's not a valid choice.`);
-      console.log('');
-    }
-
-    return choice === 'y';
   }
 
   reset() {
@@ -282,7 +292,16 @@ class TTTGame {
   }
 
   someoneWon() {
+    this.updateWinCount();
     return this.isWinner(this.human) || this.isWinner(this.computer);
+  }
+
+  updateWinCount() {
+    if (this.isWinner(this.human)) {
+      this.human.incrementScore();
+    } else if (this.isWinner(this.computer)) {
+      this.computer.incrementScore();
+    }
   }
 }
 
