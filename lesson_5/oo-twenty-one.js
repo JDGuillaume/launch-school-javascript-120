@@ -25,10 +25,9 @@ class Card {
 }
 
 class Deck {
-  // eslint-disable-next-line max-lines-per-function
   constructor() {
-    this.suits = ['♣️', '♦️', '♥️', '♠️'];
-    this.ranks = {
+    this.availableSuits = ['♣️', '♦️', '♥️', '♠️'];
+    this.availableRanks = {
       2: 2,
       3: 3,
       4: 4,
@@ -43,9 +42,7 @@ class Deck {
       King: 10,
       Ace: 11,
     };
-
     this.deck = [];
-    this.replenishDeck();
   }
 
   deal() {
@@ -54,11 +51,15 @@ class Deck {
   }
 
   replenishDeck() {
-    const numberOfSuits = this.suits.length;
+    const suits = this.availableSuits;
+    const ranks = this.availableRanks;
+    const deck = this.deck;
+
+    const numberOfSuits = suits.length;
 
     for (let suitCount = 0; suitCount < numberOfSuits; suitCount++) {
-      for (let rank in this.ranks) {
-        this.deck.push(new Card(this.suits[suitCount], rank, this.ranks[rank]));
+      for (let rank in ranks) {
+        deck.push(new Card(suits[suitCount], rank, ranks[rank]));
       }
     }
   }
@@ -75,7 +76,17 @@ class Deck {
     return this.deck.length;
   }
 
-  shuffle() {}
+  shuffle() {
+    // Fisher-Yates Shuffle from Twenty-One Procedural
+    const deck = this.deck;
+
+    const length = deck.length;
+
+    for (let index = length - 1; index > 0; index--) {
+      let otherIndex = Math.floor(Math.random() * (index + 1));
+      [deck[index], deck[otherIndex]] = [deck[otherIndex], deck[index]];
+    }
+  }
 }
 
 class Participant {
@@ -176,7 +187,7 @@ class TwentyOneGame {
   }
 
   prepareDeck() {
-    // this.deck.replenishDeck();
+    this.deck.replenishDeck();
     this.deck.shuffle();
   }
 
