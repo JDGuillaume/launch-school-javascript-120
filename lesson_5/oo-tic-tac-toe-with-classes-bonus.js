@@ -143,6 +143,7 @@ class TTTGame {
     this.board = new Board();
     this.human = new Human();
     this.computer = new Computer();
+    this.first = 'human';
   }
 
   static POSSIBLE_WINNING_ROWS = [
@@ -250,6 +251,26 @@ class TTTGame {
     });
   }
 
+  firstMove() {
+    if (this.firstMove === 'human') {
+      this.humanMoves();
+    } else {
+      this.computerMoves();
+      this.board.displayWithClear(
+        this.human.getScore(),
+        this.computer.getScore()
+      );
+    }
+  }
+
+  secondMove() {
+    if (this.firstMove === 'computer') {
+      this.computerMoves();
+    } else {
+      this.humanMoves();
+    }
+  }
+
   play() {
     //SPIKE
     this.displayWelcomeMessage();
@@ -261,10 +282,10 @@ class TTTGame {
       this.board.display(this.human.getScore(), this.computer.getScore());
 
       while (true) {
-        this.humanMoves();
+        this.firstMove();
         if (this.gameOver()) break;
 
-        this.computerMoves();
+        this.secondMove();
         if (this.gameOver()) break;
 
         this.board.displayWithClear(
@@ -288,6 +309,7 @@ class TTTGame {
 
   reset() {
     this.board = new Board();
+    this.first = this.first === 'human' ? 'computer' : 'human';
     console.clear();
   }
 
