@@ -92,6 +92,7 @@ class Deck {
 class Participant {
   constructor() {
     this.hand = [];
+    this.score = 0;
     //STUB
     // What sort of state does a participant need?
     // Score? Hand? Amount of money available?
@@ -100,6 +101,31 @@ class Participant {
 
   addCardsToHand(card) {
     this.hand.push(card);
+  }
+
+  calculateScore() {
+    //TODO: Handle Aces
+
+    let score;
+
+    score = this.hand
+      .map(card => card.getPoints())
+      .reduce((sum, value) => sum + value, 0);
+
+    return score;
+  }
+
+  getHand() {
+    return this.hand.map(card => card.getName()).join(', ');
+  }
+
+  getScore() {
+    this.setScore();
+    return this.score;
+  }
+
+  setScore() {
+    this.score = this.calculateScore();
   }
 }
 
@@ -122,10 +148,6 @@ class Player extends Participant {
   isBusted() {
     //STUB
   }
-
-  score() {
-    //STUB
-  }
 }
 
 class Dealer extends Participant {
@@ -138,6 +160,10 @@ class Dealer extends Participant {
     // Score? Hand? Deck of cards? Bow tie?
   }
 
+  getHand() {
+    return this.hand[1].getName();
+  }
+
   hit() {
     //STUB
   }
@@ -147,10 +173,6 @@ class Dealer extends Participant {
   }
 
   isBusted() {
-    //STUB
-  }
-
-  score() {
     //STUB
   }
 
@@ -183,11 +205,11 @@ class TwentyOneGame {
     this.dealerTurn();
     this.displayResult();
     this.displayGoodbyeMessage();
-    console.log(this.deck.showDeck());
-    console.log(this.deck.showDeckCount());
-    console.log(this.deck.showCardsInDeck());
-    console.log(this.player.hand);
-    console.log(this.dealer.hand);
+    // console.log(this.deck.showDeck());
+    // console.log(this.deck.showDeckCount());
+    // console.log(this.deck.showCardsInDeck());
+    // console.log(this.player.hand);
+    // console.log(this.dealer.hand);
   }
 
   prepareDeck() {
@@ -207,7 +229,15 @@ class TwentyOneGame {
   }
 
   playerTurn() {
-    //STUB
+    while (true) {
+      console.log(`Your Hand: ${this.player.getHand()}`);
+      console.log(`Dealer: Card, ${this.dealer.getHand()}`);
+      console.log('');
+      console.log(
+        `You are currently at ${this.player.getScore()}. Would you like to stay or hit?`
+      );
+      break;
+    }
   }
 
   dealerTurn() {
@@ -217,8 +247,8 @@ class TwentyOneGame {
   displayWelcomeMessage() {
     console.clear();
     console.log(`Welcome to 21!`);
-    console.log('');
     console.log(`The player that gets closest to 21 without going over, wins!`);
+    console.log('');
   }
 
   displayGoodbyeMessage() {
