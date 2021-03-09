@@ -104,15 +104,24 @@ class Participant {
   }
 
   calculateScore() {
-    //TODO: Handle Aces
-
     let score;
+    let aceCount = this.countAces();
 
     score = this.hand
       .map(card => card.getPoints())
       .reduce((sum, value) => sum + value, 0);
 
+    while (score > 21 && aceCount > 0) {
+      score -= 10;
+      aceCount -= 1;
+    }
+
     return score;
+  }
+
+  countAces() {
+    return this.hand.map(card => card.getRank()).filter(rank => rank === 'Ace')
+      .length;
   }
 
   getHand() {
