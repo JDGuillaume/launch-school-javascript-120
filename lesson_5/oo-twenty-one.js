@@ -80,9 +80,7 @@ class Deck {
     // Fisher-Yates Shuffle from Twenty-One Procedural
     const deck = this.deck;
 
-    const length = deck.length;
-
-    for (let index = length - 1; index > 0; index--) {
+    for (let index = deck.length - 1; index > 0; index--) {
       let otherIndex = Math.floor(Math.random() * (index + 1));
       [deck[index], deck[otherIndex]] = [deck[otherIndex], deck[index]];
     }
@@ -124,10 +122,6 @@ class Participant {
       .length;
   }
 
-  getHand() {
-    return this.hand.map(card => card.getName()).join(', ');
-  }
-
   getScore() {
     this.setScore();
     return this.score;
@@ -157,6 +151,10 @@ class Player extends Participant {
   isBusted() {
     //STUB
   }
+
+  showHand() {
+    return this.hand.map(card => card.getName()).join(', ');
+  }
 }
 
 class Dealer extends Participant {
@@ -167,10 +165,6 @@ class Dealer extends Participant {
     //STUB
     // What sort of state does a dealer need?
     // Score? Hand? Deck of cards? Bow tie?
-  }
-
-  getHand() {
-    return this.hand[1].getName();
   }
 
   hit() {
@@ -191,6 +185,10 @@ class Dealer extends Participant {
 
   reveal() {
     //STUB
+  }
+
+  showHand() {
+    return this.hand[1].getName();
   }
 }
 
@@ -239,8 +237,8 @@ class TwentyOneGame {
 
   playerTurn() {
     while (true) {
-      console.log(`Your Hand: ${this.player.getHand()}`);
-      console.log(`Dealer: Card, ${this.dealer.getHand()}`);
+      console.log(`Your Hand: ${this.player.showHand()}`);
+      console.log(`Dealer: Card, ${this.dealer.showHand()}`);
       console.log('');
       console.log(
         `You are currently at ${this.player.getScore()}. Would you like to stay or hit?`
