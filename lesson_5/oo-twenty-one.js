@@ -46,14 +46,14 @@ class Deck {
   }
 
   deal() {
-    //STUB
-    // does the dealer or the deck deal?
+    return this.deck.shift();
   }
 
-  replenishDeck() {
+  resetDeck() {
+    this.deck = [];
     const suits = this.availableSuits;
     const ranks = this.availableRanks;
-    const deck = this.deck;
+    let deck = this.deck;
 
     const numberOfSuits = suits.length;
 
@@ -91,10 +91,15 @@ class Deck {
 
 class Participant {
   constructor() {
+    this.hand = [];
     //STUB
     // What sort of state does a participant need?
     // Score? Hand? Amount of money available?
     // What else goes here? all the redundant behaviors from Player and Dealer?
+  }
+
+  addCardsToHand(card) {
+    this.hand.push(card);
   }
 }
 
@@ -156,16 +161,13 @@ class Dealer extends Participant {
   reveal() {
     //STUB
   }
-
-  deal() {
-    //STUB
-    // does the dealer or the deck deal?
-  }
 }
 
 class TwentyOneGame {
   constructor() {
     this.deck = new Deck();
+    this.player = new Player();
+    this.dealer = new Dealer();
     //STUB
     // What sort of state does the game need?
     // A deck? Two participants?
@@ -184,15 +186,20 @@ class TwentyOneGame {
     console.log(this.deck.showDeck());
     console.log(this.deck.showDeckCount());
     console.log(this.deck.showCardsInDeck());
+    console.log(this.player.hand);
+    console.log(this.dealer.hand);
   }
 
   prepareDeck() {
-    this.deck.replenishDeck();
+    this.deck.resetDeck();
     this.deck.shuffle();
   }
 
   dealCards() {
-    //STUB
+    this.player.addCardsToHand(this.deck.deal());
+    this.dealer.addCardsToHand(this.deck.deal());
+    this.player.addCardsToHand(this.deck.deal());
+    this.dealer.addCardsToHand(this.deck.deal());
   }
 
   showCards() {
