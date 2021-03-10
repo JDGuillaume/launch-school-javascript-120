@@ -89,9 +89,12 @@ class Deck {
 
 class Participant {
   constructor() {
+    this.busted = false;
     this.hand = [];
     this.score = 0;
   }
+
+  static POINTS_TO_WIN = 21;
 
   addCardToHand(card) {
     this.hand.push(card);
@@ -105,7 +108,7 @@ class Participant {
       .map(card => card.getPoints())
       .reduce((sum, value) => sum + value, 0);
 
-    while (score > 21 && aceCount > 0) {
+    while (score > Participant.POINTS_TO_WIN && aceCount > 0) {
       score -= 10;
       aceCount -= 1;
     }
@@ -118,6 +121,10 @@ class Participant {
       .length;
   }
 
+  getBustStatus() {
+    return this.busted;
+  }
+
   getScore() {
     this.setScore();
     return this.score;
@@ -127,18 +134,13 @@ class Participant {
     this.addCardToHand(card);
   }
 
-  isBusted() {
-    return this.score > 21;
+  setBustStatus() {
+    this.getScore();
+    this.busted = this.score > Participant.POINTS_TO_WIN;
   }
 
   setScore() {
     this.score = this.calculateScore();
-  }
-}
-
-class Player extends Participant {
-  constructor() {
-    super();
   }
 
   showHand() {
@@ -146,27 +148,18 @@ class Player extends Participant {
   }
 }
 
+class Player extends Participant {
+  constructor() {
+    super();
+  }
+}
+
 class Dealer extends Participant {
   constructor() {
     super();
-    //STUB
-    // What sort of state does a dealer need?
-    // Score? Hand? Deck of cards? Bow tie?
   }
 
-  hit() {
-    //STUB
-  }
-
-  hide() {
-    //STUB
-  }
-
-  reveal() {
-    //STUB
-  }
-
-  showHand() {
+  showHandHidden() {
     return this.hand[1].getName();
   }
 }
@@ -176,21 +169,23 @@ class TwentyOneGame {
     this.deck = new Deck();
     this.player = new Player();
     this.dealer = new Dealer();
-    //STUB
-    // What sort of state does the game need?
-    // A deck? Two participants?
   }
 
+  static DEALER_HIT_THRESHOLD = 17;
+
   start() {
-    //SPIKE
-    this.prepareDeck();
     this.displayWelcomeMessage();
+    this.playOneRound();
+    this.displayGoodbyeMessage();
+  }
+
+  playOneRound() {
+    this.prepareDeck();
     this.dealCards();
     this.showCards();
     this.playerTurn();
-    this.dealerTurn();
+    if (!this.player.getBustStatus) this.dealerTurn();
     this.displayResult();
-    this.displayGoodbyeMessage();
   }
 
   prepareDeck() {
@@ -207,7 +202,7 @@ class TwentyOneGame {
 
   showCards() {
     console.log(`Your Hand: ${this.player.showHand()}`);
-    console.log(`Dealer: Card, ${this.dealer.showHand()}`);
+    console.log(`Dealer: Card, ${this.dealer.showHandHidden()}`);
     console.log('');
   }
 
@@ -220,12 +215,21 @@ class TwentyOneGame {
       console.clear();
 
       this.showCards();
+
+      this.player.setBustStatus();
+      if (this.player.getBustStatus()) break;
+
       choice = this.getPlayerAction();
     }
   }
 
   dealerTurn() {
-    //STUB
+    while (this.dealer.score < TwentyOneGame.DEALER_HIT_THRESHOLD) {
+      this.dealer.hit(this.deck.deal());
+
+      this.dealer.setBustStatus();
+      if (this.dealer.getBustStatus()) break;
+    }
   }
 
   displayWelcomeMessage() {
@@ -240,7 +244,9 @@ class TwentyOneGame {
   }
 
   displayResult() {
-    //STUB
+    console.log(
+      `Player - ${this.player.getScore()} Dealer - ${this.dealer.getScore()}`
+    );
   }
 
   getPlayerAction() {
