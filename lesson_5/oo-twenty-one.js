@@ -91,13 +91,9 @@ class Participant {
   constructor() {
     this.hand = [];
     this.score = 0;
-    //STUB
-    // What sort of state does a participant need?
-    // Score? Hand? Amount of money available?
-    // What else goes here? all the redundant behaviors from Player and Dealer?
   }
 
-  addCardsToHand(card) {
+  addCardToHand(card) {
     this.hand.push(card);
   }
 
@@ -127,6 +123,14 @@ class Participant {
     return this.score;
   }
 
+  hit(card) {
+    this.addCardToHand(card);
+  }
+
+  isBusted() {
+    return this.score > 21;
+  }
+
   setScore() {
     this.score = this.calculateScore();
   }
@@ -135,21 +139,6 @@ class Participant {
 class Player extends Participant {
   constructor() {
     super();
-    //STUB
-    // What sort of state does a player need?
-    // Score? Hand? Amount of money available?
-  }
-
-  hit() {
-    //STUB
-  }
-
-  stay() {
-    //STUB
-  }
-
-  isBusted() {
-    //STUB
   }
 
   showHand() {
@@ -158,8 +147,6 @@ class Player extends Participant {
 }
 
 class Dealer extends Participant {
-  // Very similar to a Player; do we need this?
-
   constructor() {
     super();
     //STUB
@@ -168,14 +155,6 @@ class Dealer extends Participant {
   }
 
   hit() {
-    //STUB
-  }
-
-  stay() {
-    //STUB
-  }
-
-  isBusted() {
     //STUB
   }
 
@@ -212,11 +191,6 @@ class TwentyOneGame {
     this.dealerTurn();
     this.displayResult();
     this.displayGoodbyeMessage();
-    // console.log(this.deck.showDeck());
-    // console.log(this.deck.showDeckCount());
-    // console.log(this.deck.showCardsInDeck());
-    // console.log(this.player.hand);
-    // console.log(this.dealer.hand);
   }
 
   prepareDeck() {
@@ -225,25 +199,28 @@ class TwentyOneGame {
   }
 
   dealCards() {
-    this.player.addCardsToHand(this.deck.deal());
-    this.dealer.addCardsToHand(this.deck.deal());
-    this.player.addCardsToHand(this.deck.deal());
-    this.dealer.addCardsToHand(this.deck.deal());
+    this.player.addCardToHand(this.deck.deal());
+    this.dealer.addCardToHand(this.deck.deal());
+    this.player.addCardToHand(this.deck.deal());
+    this.dealer.addCardToHand(this.deck.deal());
   }
 
   showCards() {
-    //STUB
+    console.log(`Your Hand: ${this.player.showHand()}`);
+    console.log(`Dealer: Card, ${this.dealer.showHand()}`);
+    console.log('');
   }
 
   playerTurn() {
-    while (true) {
-      console.log(`Your Hand: ${this.player.showHand()}`);
-      console.log(`Dealer: Card, ${this.dealer.showHand()}`);
-      console.log('');
-      console.log(
-        `You are currently at ${this.player.getScore()}. Would you like to stay or hit?`
-      );
-      break;
+    let choice = this.getPlayerAction();
+
+    while (choice === 'h') {
+      this.player.hit(this.deck.deal());
+
+      console.clear();
+
+      this.showCards();
+      choice = this.getPlayerAction();
     }
   }
 
@@ -264,6 +241,25 @@ class TwentyOneGame {
 
   displayResult() {
     //STUB
+  }
+
+  getPlayerAction() {
+    let answer;
+
+    while (true) {
+      answer = readline
+        .question(
+          `You are currently at ${this.player.getScore()}. Would you like to hit or stay? (h/s): `
+        )
+        .toLowerCase();
+
+      if (['h', 's'].includes(answer)) break;
+
+      console.log("Sorry, that's not a valid choice.");
+      console.log('');
+    }
+
+    return answer;
   }
 }
 
