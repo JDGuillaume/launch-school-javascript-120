@@ -1,3 +1,4 @@
+/* eslint-disable max-lines-per-function */
 const readline = require('readline-sync');
 
 class Card {
@@ -11,12 +12,12 @@ class Card {
     return `${this.suit} ${this.rank}`;
   }
 
-  getRank() {
-    return this.rank;
-  }
-
   getPoints() {
     return this.points;
+  }
+
+  getRank() {
+    return this.rank;
   }
 
   getSuit() {
@@ -64,18 +65,6 @@ class Deck {
     }
   }
 
-  showCardsInDeck() {
-    return this.deck.map(card => card.getName());
-  }
-
-  showDeck() {
-    return this.deck;
-  }
-
-  showDeckCount() {
-    return this.deck.length;
-  }
-
   shuffle() {
     // Fisher-Yates Shuffle from Twenty-One Procedural
     const deck = this.deck;
@@ -95,6 +84,7 @@ class Participant {
   }
 
   static POINTS_TO_WIN = 21;
+  static VALUE_OF_ACE = new Deck().availableRanks.Ace;
 
   calculateScore() {
     let score;
@@ -105,7 +95,7 @@ class Participant {
       .reduce((sum, value) => sum + value, 0);
 
     while (score > Participant.POINTS_TO_WIN && aceCount > 0) {
-      score -= 10;
+      score -= Participant.VALUE_OF_ACE - 1;
       aceCount -= 1;
     }
 
@@ -117,13 +107,21 @@ class Participant {
       .length;
   }
 
+  getScore() {
+    this.setScore();
+    return this.score;
+  }
+
+  setScore() {
+    this.score = this.calculateScore();
+  }
+
   getBustStatus() {
     return this.busted;
   }
 
-  getScore() {
-    this.setScore();
-    return this.score;
+  setBustStatus() {
+    this.busted = this.score > Participant.POINTS_TO_WIN;
   }
 
   hit(card) {
@@ -133,14 +131,6 @@ class Participant {
   reset() {
     this.hand = [];
     this.busted = false;
-  }
-
-  setBustStatus() {
-    this.busted = this.score > Participant.POINTS_TO_WIN;
-  }
-
-  setScore() {
-    this.score = this.calculateScore();
   }
 
   showHand() {
@@ -221,28 +211,40 @@ class TwentyOneGame {
     this.displayResult();
   }
 
-  displayResult() {
-    if (this.isWinner(this.player, this.dealer)) {
-      console.log(
-        `Congratulations! You won this round! +$${TwentyOneGame.WAGER}`
-      );
-    } else if (this.isWinner(this.dealer, this.player)) {
-      console.log(`Nice try human! -$${TwentyOneGame.WAGER}`);
-    } else {
-      console.log(`Oh look, a tie!`);
-    }
-  }
-
   isWinner(player, opponent) {
     const playerScore = player.getScore();
     const opponentScore = opponent.getScore();
 
     return (
       !player.getBustStatus() &&
-      (playerScore === 21 ||
+      (playerScore === Participant.POINTS_TO_WIN ||
         playerScore > opponentScore ||
         opponent.getBustStatus())
     );
+  }
+
+  displayResult() {
+    if (this.player.getBustStatus()) {
+      this.prompt(
+        `Oh no, you busted! (${this.player.getScore()}) -$${
+          TwentyOneGame.WAGER
+        }`
+      );
+    } else if (this.dealer.getBustStatus()) {
+      this.prompt(
+        `Yay! The dealer busted! (${this.dealer.getScore()}) +$${
+          TwentyOneGame.WAGER
+        }`
+      );
+    } else if (this.isWinner(this.player, this.dealer)) {
+      this.prompt(
+        `Congratulations! You won this round! +$${TwentyOneGame.WAGER}`
+      );
+    } else if (this.isWinner(this.dealer, this.player)) {
+      this.prompt(`Nice try human! -$${TwentyOneGame.WAGER}`);
+    } else {
+      this.prompt(`Oh look, a tie!`);
+    }
   }
 
   displayFunds() {
@@ -307,7 +309,15 @@ class TwentyOneGame {
     console.log('');
     console.log(`Your Hand: ${this.player.showHand()}`);
     console.log(`Dealer: Card, ${this.dealer.showHandHidden()}`);
-    console.log('');
+  }
+
+  showAllCards() {
+    console.log(
+      `Your Hand: ${this.player.showHand()} (${this.player.getScore()})`
+    );
+    console.log(
+      `Dealer: ${this.dealer.showHand()} (${this.dealer.getScore()})`
+    );
   }
 
   playerTurn() {
@@ -329,8 +339,12 @@ class TwentyOneGame {
   }
 
   dealerTurn() {
+    this.showAllCards();
+
     while (this.dealer.getScore() < TwentyOneGame.DEALER_HIT_THRESHOLD) {
       this.dealer.hit(this.deck.deal());
+      this.prompt(`The dealer hit!`);
+      this.showAllCards();
 
       this.dealer.setBustStatus();
       if (this.dealer.getBustStatus()) break;
@@ -352,12 +366,13 @@ class TwentyOneGame {
     let answer;
 
     while (true) {
+      console.log();
       answer = readline
         .question(
           `You are currently at ${this.player.getScore()}. Would you like to hit or stay? (h/s): `
         )
         .toLowerCase();
-
+      console.log();
       if (['h', 's'].includes(answer)) break;
 
       console.log("Sorry, that's not a valid choice.");
