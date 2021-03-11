@@ -96,10 +96,6 @@ class Participant {
 
   static POINTS_TO_WIN = 21;
 
-  addCardToHand(card) {
-    this.hand.push(card);
-  }
-
   calculateScore() {
     let score;
     let aceCount = this.countAces();
@@ -131,11 +127,15 @@ class Participant {
   }
 
   hit(card) {
-    this.addCardToHand(card);
+    this.hand.push(card);
+  }
+
+  reset() {
+    this.hand = [];
+    this.busted = false;
   }
 
   setBustStatus() {
-    this.getScore();
     this.busted = this.score > Participant.POINTS_TO_WIN;
   }
 
@@ -151,6 +151,19 @@ class Participant {
 class Player extends Participant {
   constructor() {
     super();
+    this.funds = 5;
+  }
+
+  decrementFunds(wager) {
+    this.funds -= wager;
+  }
+
+  getFunds() {
+    return this.funds;
+  }
+
+  incrementFunds(wager) {
+    this.funds += wager;
   }
 }
 
@@ -172,35 +185,126 @@ class TwentyOneGame {
   }
 
   static DEALER_HIT_THRESHOLD = 17;
+  static RICH = 10;
+  static WAGER = 1;
 
   start() {
     this.displayWelcomeMessage();
-    this.playOneRound();
+    this.startMatch();
     this.displayGoodbyeMessage();
   }
 
+  prompt(message) {
+    console.log('');
+    console.log(message);
+    console.log('');
+  }
+
+  displayInstructions() {
+    console.log(
+      `You'll start with $${this.player.getFunds()}. You'll earn $${
+        TwentyOneGame.WAGER
+      } if you win and you'll lose $${TwentyOneGame.WAGER} if you don't.`
+    );
+    console.log(
+      `The match is over once you're rich ($${TwentyOneGame.RICH}) or you run out of money!`
+    );
+    console.log('');
+  }
+
   playOneRound() {
-    this.prepareDeck();
+    this.resetRound();
     this.dealCards();
     this.showCards();
     this.playerTurn();
-    if (!this.player.getBustStatus) this.dealerTurn();
+    if (!this.player.getBustStatus()) this.dealerTurn();
     this.displayResult();
   }
 
-  prepareDeck() {
+  displayResult() {
+    if (this.isWinner(this.player, this.dealer)) {
+      console.log(
+        `Congratulations! You won this round! +$${TwentyOneGame.WAGER}`
+      );
+    } else if (this.isWinner(this.dealer, this.player)) {
+      console.log(`Nice try human! -$${TwentyOneGame.WAGER}`);
+    } else {
+      console.log(`Oh look, a tie!`);
+    }
+  }
+
+  isWinner(player, opponent) {
+    const playerScore = player.getScore();
+    const opponentScore = opponent.getScore();
+
+    return (
+      !player.getBustStatus() &&
+      (playerScore === 21 ||
+        playerScore > opponentScore ||
+        opponent.getBustStatus())
+    );
+  }
+
+  displayFunds() {
+    console.log(`Funds: $${this.player.getFunds()}`);
+  }
+
+  updateFunds() {
+    if (this.isWinner(this.player, this.dealer)) {
+      this.player.incrementFunds(TwentyOneGame.WAGER);
+    } else if (this.isWinner(this.dealer, this.player)) {
+      this.player.decrementFunds(TwentyOneGame.WAGER);
+    }
+  }
+
+  startMatch() {
+    this.displayInstructions();
+
+    while (true) {
+      this.playOneRound();
+      this.updateFunds();
+
+      if (this.matchOver()) break;
+      if (!this.playAgain()) break;
+    }
+
+    this.displayMatchResults();
+  }
+
+  matchOver() {
+    let funds = this.player.getFunds();
+    return funds === 0 || funds === TwentyOneGame.RICH;
+  }
+
+  displayMatchResults() {
+    let funds = this.player.getFunds();
+
+    if (funds === 10) {
+      this.prompt(`Congratulations you're rich!`);
+    } else if (funds === 0) {
+      this.prompt(`Looks like you ran out of money! Better luck next time!`);
+    } else {
+      this.prompt(`It looks like you left early! You earned $${funds}!`);
+    }
+  }
+
+  resetRound() {
     this.deck.resetDeck();
     this.deck.shuffle();
+    this.player.reset();
+    this.dealer.reset();
   }
 
   dealCards() {
-    this.player.addCardToHand(this.deck.deal());
-    this.dealer.addCardToHand(this.deck.deal());
-    this.player.addCardToHand(this.deck.deal());
-    this.dealer.addCardToHand(this.deck.deal());
+    this.player.hit(this.deck.deal());
+    this.dealer.hit(this.deck.deal());
+    this.player.hit(this.deck.deal());
+    this.dealer.hit(this.deck.deal());
   }
 
   showCards() {
+    this.displayFunds();
+    console.log('');
     console.log(`Your Hand: ${this.player.showHand()}`);
     console.log(`Dealer: Card, ${this.dealer.showHandHidden()}`);
     console.log('');
@@ -214,9 +318,10 @@ class TwentyOneGame {
 
       console.clear();
 
+      this.player.setScore();
       this.showCards();
-
       this.player.setBustStatus();
+
       if (this.player.getBustStatus()) break;
 
       choice = this.getPlayerAction();
@@ -224,7 +329,7 @@ class TwentyOneGame {
   }
 
   dealerTurn() {
-    while (this.dealer.score < TwentyOneGame.DEALER_HIT_THRESHOLD) {
+    while (this.dealer.getScore() < TwentyOneGame.DEALER_HIT_THRESHOLD) {
       this.dealer.hit(this.deck.deal());
 
       this.dealer.setBustStatus();
@@ -241,12 +346,6 @@ class TwentyOneGame {
 
   displayGoodbyeMessage() {
     console.log(`Thanks for playing 21! Goodbye!`);
-  }
-
-  displayResult() {
-    console.log(
-      `Player - ${this.player.getScore()} Dealer - ${this.dealer.getScore()}`
-    );
   }
 
   getPlayerAction() {
@@ -266,6 +365,24 @@ class TwentyOneGame {
     }
 
     return answer;
+  }
+
+  playAgain() {
+    let answer;
+
+    while (true) {
+      answer = readline
+        .question('Would you like to play again? (y/n): ')
+        .toLowerCase();
+
+      if (['y', 'n'].includes(answer)) break;
+
+      console.log("Sorry, that's not a valid choice.");
+      console.log('');
+    }
+
+    console.clear();
+    return answer === 'y';
   }
 }
 
