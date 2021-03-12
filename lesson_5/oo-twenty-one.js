@@ -139,9 +139,10 @@ class Participant {
 }
 
 class Player extends Participant {
+  static INITIAL_FUNDS = 5;
   constructor() {
     super();
-    this.funds = 5;
+    this.funds = Player.INITIAL_FUNDS;
   }
 
   decrementFunds(wager) {
