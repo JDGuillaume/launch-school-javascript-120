@@ -27,24 +27,25 @@ class Card {
 
 class Deck {
   constructor() {
-    this.availableSuits = ['♣️', '♦️', '♥️', '♠️'];
-    this.availableRanks = {
-      2: 2,
-      3: 3,
-      4: 4,
-      5: 5,
-      6: 6,
-      7: 7,
-      8: 8,
-      9: 9,
-      10: 10,
-      Jack: 10,
-      Queen: 10,
-      King: 10,
-      Ace: 11,
-    };
     this.deck = [];
   }
+
+  static availableSuits = ['♣️', '♦️', '♥️', '♠️'];
+  static availableRanks = {
+    2: 2,
+    3: 3,
+    4: 4,
+    5: 5,
+    6: 6,
+    7: 7,
+    8: 8,
+    9: 9,
+    10: 10,
+    Jack: 10,
+    Queen: 10,
+    King: 10,
+    Ace: 11,
+  };
 
   deal() {
     return this.deck.shift();
@@ -52,8 +53,8 @@ class Deck {
 
   resetDeck() {
     this.deck = [];
-    const suits = this.availableSuits;
-    const ranks = this.availableRanks;
+    const suits = Deck.availableSuits;
+    const ranks = Deck.availableRanks;
     let deck = this.deck;
 
     const numberOfSuits = suits.length;
@@ -84,7 +85,6 @@ class Participant {
   }
 
   static POINTS_TO_WIN = 21;
-  static VALUE_OF_ACE = new Deck().availableRanks.Ace;
 
   calculateScore() {
     let score;
@@ -95,7 +95,7 @@ class Participant {
       .reduce((sum, value) => sum + value, 0);
 
     while (score > Participant.POINTS_TO_WIN && aceCount > 0) {
-      score -= Participant.VALUE_OF_ACE - 1;
+      score -= Deck.availableRanks.Ace - 1;
       aceCount -= 1;
     }
 
@@ -140,6 +140,7 @@ class Participant {
 
 class Player extends Participant {
   static INITIAL_FUNDS = 5;
+
   constructor() {
     super();
     this.funds = Player.INITIAL_FUNDS;
@@ -267,8 +268,7 @@ class TwentyOneGame {
       this.playOneRound();
       this.updateFunds();
 
-      if (this.matchOver()) break;
-      if (!this.playAgain()) break;
+      if (this.matchOver() || !this.playAgain()) break;
     }
 
     this.displayMatchResults();
@@ -308,7 +308,9 @@ class TwentyOneGame {
   showCards() {
     this.displayFunds();
     console.log('');
-    console.log(`Your Hand: ${this.player.showHand()}`);
+    console.log(
+      `Your Hand: ${this.player.showHand()} (${this.player.getScore()})`
+    );
     console.log(`Dealer: Card, ${this.dealer.showHandHidden()}`);
   }
 
@@ -369,9 +371,7 @@ class TwentyOneGame {
     while (true) {
       console.log();
       answer = readline
-        .question(
-          `You are currently at ${this.player.getScore()}. Would you like to hit or stay? (h/s): `
-        )
+        .question(`Would you like to hit or stay? (h/s): `)
         .toLowerCase();
       console.log();
       if (['h', 's'].includes(answer)) break;
