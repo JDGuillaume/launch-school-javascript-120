@@ -128,6 +128,18 @@ class Participant {
     this.hand.push(card);
   }
 
+  isWinner(player, opponent) {
+    const playerScore = player.getScore();
+    const opponentScore = opponent.getScore();
+
+    return (
+      !player.getBustStatus() &&
+      (playerScore === Participant.POINTS_TO_WIN ||
+        playerScore > opponentScore ||
+        opponent.getBustStatus())
+    );
+  }
+
   reset() {
     this.hand = [];
     this.busted = false;
@@ -213,18 +225,6 @@ class TwentyOneGame {
     this.displayResult();
   }
 
-  isWinner(player, opponent) {
-    const playerScore = player.getScore();
-    const opponentScore = opponent.getScore();
-
-    return (
-      !player.getBustStatus() &&
-      (playerScore === Participant.POINTS_TO_WIN ||
-        playerScore > opponentScore ||
-        opponent.getBustStatus())
-    );
-  }
-
   displayResult() {
     if (this.player.getBustStatus()) {
       this.prompt(
@@ -238,11 +238,11 @@ class TwentyOneGame {
           TwentyOneGame.WAGER
         }`
       );
-    } else if (this.isWinner(this.player, this.dealer)) {
+    } else if (this.player.isWinner(this.player, this.dealer)) {
       this.prompt(
         `Congratulations! You won this round! +$${TwentyOneGame.WAGER}`
       );
-    } else if (this.isWinner(this.dealer, this.player)) {
+    } else if (this.dealer.isWinner(this.dealer, this.player)) {
       this.prompt(`Nice try human! -$${TwentyOneGame.WAGER}`);
     } else {
       this.prompt(`Oh look, a tie!`);
@@ -254,9 +254,9 @@ class TwentyOneGame {
   }
 
   updateFunds() {
-    if (this.isWinner(this.player, this.dealer)) {
+    if (this.player.isWinner(this.player, this.dealer)) {
       this.player.incrementFunds(TwentyOneGame.WAGER);
-    } else if (this.isWinner(this.dealer, this.player)) {
+    } else if (this.dealer.isWinner(this.dealer, this.player)) {
       this.player.decrementFunds(TwentyOneGame.WAGER);
     }
   }
